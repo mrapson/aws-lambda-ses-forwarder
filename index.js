@@ -235,6 +235,9 @@ exports.processMessage = function(data) {
   // Remove Sender header.
   header = header.replace(/^Sender: (.*)\r?\n/mg, '');
 
+  // Remove Precedence header.
+  header = header.replace(/^Precedence: (.*)\r?\n/mg, '');
+
   // Remove Message-ID header.
   header = header.replace(/^Message-ID: (.*)\r?\n/mig, '');
 
