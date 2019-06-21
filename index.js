@@ -71,6 +71,12 @@ exports.parseEvent = function(data) {
 
   data.email = data.event.Records[0].ses.mail;
   data.recipients = data.event.Records[0].ses.receipt.recipients;
+
+  data.spamVerdict = data.event.Records[0].ses.receipt.spamVerdict;
+  data.log({level: "info", message: "spamVerdict: " + data.spamVerdict.status});
+  data.virusVerdict = data.event.Records[0].ses.receipt.virusVerdict;
+  data.log({level: "info", message: "virusVerdict: " + data.virusVerdict.status});
+
   return Promise.resolve(data);
 };
 
