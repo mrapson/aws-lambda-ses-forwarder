@@ -114,15 +114,15 @@ exports.transformRecipients = function(data) {
         origEmailDomain = origEmailKey.slice(pos);
         origEmailUser = origEmailKey.slice(0, pos);
       }
-      if (origEmailDomain &&
-          data.config.forwardMapping.hasOwnProperty(origEmailDomain)) {
-        newRecipients = newRecipients.concat(
-          data.config.forwardMapping[origEmailDomain]);
-        data.originalRecipient = origEmail;
-      } else if (origEmailUser &&
+      if (origEmailUser &&
         data.config.forwardMapping.hasOwnProperty(origEmailUser)) {
         newRecipients = newRecipients.concat(
           data.config.forwardMapping[origEmailUser]);
+        data.originalRecipient = origEmail;
+      } else if (origEmailDomain &&
+          data.config.forwardMapping.hasOwnProperty(origEmailDomain)) {
+        newRecipients = newRecipients.concat(
+          data.config.forwardMapping[origEmailDomain]);
         data.originalRecipient = origEmail;
       } else if (data.config.forwardMapping.hasOwnProperty("@")) {
         newRecipients = newRecipients.concat(
