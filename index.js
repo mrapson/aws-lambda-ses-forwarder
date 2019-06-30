@@ -258,6 +258,36 @@ exports.processMessage = function(data) {
 };
 
 /**
+ * Checks spam and virus verdict, rejecting if not "PASS".
+ *
+ * @param {object} data - Data bundle with context, email, etc.
+ *
+ * @return {object} - Promise resolved with data.
+ */
+exports.checkSpam = function(data) {
+  var match = data.emailData.match(/^((?:.+\r?\n)*)(\r?\n(?:.*\s+)*)/m);
+  var header = match && match[1] ? match[1] : data.emailData;
+  var subject = header.match(/^Subject: (.*)/mg);
+
+  if (data.spamVerdict.status !== "PASS") {
+    data.log({level: "error", message: "spamVerdict not clean:",
+      event: JSON.stringify(data.event)});
+    data.log({level: "error", message: "Subject: " + subject});
+    return Promise.reject(new Error('Error: spamVerdict not clean.'));
+  }
+
+  if (data.virusVerdict.status !== "PASS") {
+    data.log({level: "error", message: "virusVerdict not clean:",
+      event: JSON.stringify(data.event)});
+    data.log({level: "error", message: "Subject: " + subject});
+    return Promise.reject(new Error('Error: virusVerdict not clean.'));
+  }
+
+  data.log({level: "info", message: "checkSpam run and passed"});
+  return Promise.resolve(data);
+};
+
+/**
  * Send email using the SES sendRawEmail command.
  *
  * @param {object} data - Data bundle with context, email, etc.
@@ -306,6 +336,7 @@ exports.handler = function(event, context, callback, overrides) {
     exports.transformRecipients,
     exports.fetchMessage,
     exports.processMessage,
+    exports.checkSpam,
     exports.sendMessage
   ];
   var data = {
