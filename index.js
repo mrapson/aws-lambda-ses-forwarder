@@ -260,9 +260,25 @@ exports.processMessage = function(data) {
       });
   }
 
-  // Replace original 'To' header with a manually defined one
-  if (data.config.toEmail) {
-    header = header.replace(/^to:[\t ]?(.*)/mgi, 'To: ' + data.config.toEmail);
+  // Check the length of the original 'To' header and trim it if over length
+  // Include all of our addresses and as many other addresses as possible
+  if (data.config.toInclude) {
+    header = header.replace(
+      /^To: (.*(?:\r?\n\s+.*)*\r?\n)/mg,
+      function(match, to) {
+        var AWS_MAX_RECIPIENTS = 50;
+        var toArr = to.replace(/\s+/g, '').split(',');
+
+        if (toArr.length >= AWS_MAX_RECIPIENTS) {
+          var ourArr = toArr.filter(
+            (addr) => {return addr.search(data.config.toInclude) >= 0});
+          var otherArr = toArr.filter(
+            (addr) => {return addr.search(data.config.toInclude) < 0});
+          toArr = ourArr.concat(otherArr);
+          toArr = toArr.slice(0, AWS_MAX_RECIPIENTS);
+        }
+        return 'To: ' + toArr.join(', ') + '\n';
+      });
   }
 
   // Remove the Return-Path header.
